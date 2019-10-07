@@ -47,13 +47,29 @@ func getRest() {
 
 }
 
-func validate(x int, y string) {
-	if x <= 0 && y != "rest" {
-		fmt.Println(y, "must be greater than 0")
+func validate(x int, y string) bool {
+	fmt.Println("validating", y)
 
-	} else if x > 30 && y == "sets" {
+	if x < 1 && x > 500 {
+		fmt.Println(y, "must be greater than 0 and less than 500 (you are doing it wrong!!!)")
+		switch y {
+		case "rest":
+			getRest()
+		case "sets":
+			getSets()
+		case "work":
+			getWork()
+		default:
+			return false
+		}
+
+	}
+
+	if x > 30 && y == "sets" {
+		var response string
 		fmt.Println("are you sure you want to do", x, "sets? (y/n)")
-		fmt.Fscanln(r)
+		fmt.Scan(&response)
+		if response == "y"
 		// go back to getSets
 	} else if x > 500 {
 		fmt.Println(x, "seems like a lot of", y, "are you sure? (y/n)")
@@ -62,6 +78,7 @@ func validate(x int, y string) {
 	} else {
 		return true
 	}
+	return false
 }
 
 func main() {
