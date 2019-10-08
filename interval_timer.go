@@ -50,8 +50,8 @@ func getRest() {
 func validate(x int, y string) bool {
 	fmt.Println("validating", y)
 
-	if x < 1 && x > 500 {
-		fmt.Println(y, "must be greater than 0 and less than 500 (you are doing it wrong!!!)")
+	if x < 1 && x > 600 {
+		fmt.Println(y, "must be greater than 0 and less than 600 (you are doing it wrong!!!)")
 		switch y {
 		case "rest":
 			getRest()
@@ -69,16 +69,14 @@ func validate(x int, y string) bool {
 		var response string
 		fmt.Println("are you sure you want to do", x, "sets? (y/n)")
 		fmt.Scan(&response)
-		if response == "y"
-		// go back to getSets
-	} else if x > 500 {
-		fmt.Println(x, "seems like a lot of", y, "are you sure? (y/n)")
-		fmt.Fscan(r)
-		// go back to getXXX
-	} else {
-		return true
+		if response != "y" {
+			getSets()
+		}
+		return false
 	}
-	return false
+
+	return true
+
 }
 
 func main() {
