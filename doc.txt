@@ -1,0 +1,14 @@
+# interval timer
+
+## runs interval timer for set amount of work, rest and sets
+## has the ability to save config to db
+## local couchbase instance on work pc using json for config
+## json:
+{
+  "name": "name of config"
+  "data": {
+    "sets": "number of sets"
+    "work": "number of seconds for work"
+    "rest": "number of seconds for rest"
+  }
+}
