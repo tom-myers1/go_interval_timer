@@ -1,13 +1,36 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Interval Timer</title>
-        <link rel="stylesheet" href="custom.css" />
-    </head>
-    <body>
-        <div class="container">
-            <p id="text" class="text"></p>
-        </div>
-        <script src="app.js"></script>
-    </body>
+
+<head>
+  <meta charset="UTF-8">
+  <link href="https://fonts.googleapis.com/css?family=Lato:100,300,600" rel="stylesheet" type="text/css">
+  <link href="http://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css" rel="stylesheet" type="text/css">
+  <title>Interval Timer</title>
+  <link type="text/css" rel="stylesheet" href="custom.css" />
+</head>
+
+<body>
+  <div class="container">
+    <div class="input">
+      <div class="work" id="work">
+        <div class="workTitle" id="workTitle">Enter number of seconds for work</div>
+        <input type="number" placeholder="work" class="workInput">
+      </div>
+      <div class="rest" id="rest">
+        <div class="restTitle" id="restTitle">Enter number of seconds for rest</div>
+        <input type="number" placeholder="rest" class="rest">
+      </div>
+      <div class="sets" id="sets">
+        <div class="setsTitle" id="setsTitle">Enter number of sets</div>
+        <input type="number" placeholder="sets" class="sets">
+      </div>
+    </div>
+    <button class="start"><i class="md-arrow-round-forward"></i>start</button>
+    <p id="text" class="text"></p>
+    <img src="back.jpg" alt="background" class="background" id="background">
+  </div>
+
+  <script src="app.js"></script>
+</body>
+
 </html>
