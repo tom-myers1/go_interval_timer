@@ -8,21 +8,21 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/couchbase/gocb"
+	"github.com/gofrs/uuid"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
-	"github.com/satori/go.uuid"
+	"gopkg.in/couchbase/gocb.v1"
 )
 
 // Config is the top level json structure for storing in database.
 type Config struct {
-	ID     string `json:"id,omitempty"`
-	Name   string `json:"name,omitempty"`
-	Config Data   `json:"config,omitempty"`
+	ID     string    `json:"id,omitempty"`
+	Name   string    `json:"name,omitempty"`
+	Config TimerData `json:"config,omitempty"`
 }
 
-// Data is the second level json structure.
-type Data struct {
+// TimerData is the second level json structure.
+type TimerData struct {
 	Work int `json:"work,omitempty"`
 	Rest int `json:"rest,omitempty"`
 	Sets int `json:"sets,omitempty"`
@@ -70,12 +70,18 @@ func SearchEndpoint(w http.ResponseWriter, req *http.Request) {
 
 // CreateEndpoint saves configs to database.
 func CreateEndpoint(w http.ResponseWriter, req *http.Request) {
+	u1, err := uuid.NewV4()
+	if err != nil {
+		fmt.Printf("Something went wrong: %s", err)
+		return
+	}
 	var config Config
 	_ = json.NewDecoder(req.Body).Decode(&config)
-	bucket.Insert(uuid.NewV4().String(), config, 0)
+	bucket.Insert(u1.String(), config, 0)
 	json.NewEncoder(w).Encode(config)
 }
 
+// Main is main
 func main() {
 	fmt.Println("Starting server at http://localhost:12345...")
 	cluster, _ := gocb.Connect("couchbase://localhost")
