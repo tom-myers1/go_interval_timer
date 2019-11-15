@@ -1,3 +1,18 @@
-<p>
-  create works!
-</p>
+<md-toolbar color="primary">
+    Interval Timer
+    <span class="app-toolbar-filler"></span>
+    <button md-button (click)="save()">Save</button>
+</md-toolbar>
+<div class="app-content">
+    <md-card>
+        <md-card-header>
+            <md-card-title>add a new timer?</md-card-title>
+        </md-card-header>
+        <md-card-content>
+            <md-input placeholder="Name" [(ngModel)]="timer.name"></md-input><br />
+            <md-checkbox [checked]="false" [(ngModel)]="timer.data.sets">Digital Copy</md-checkbox>
+            <md-checkbox [checked]="false" [(ngModel)]="timer.data.work">Blu-Ray</md-checkbox>
+            <md-checkbox [checked]="false" [(ngModel)]="timer.data.rest">DVD</md-checkbox>
+        </md-card-content>
+    </md-card>
+</div>
