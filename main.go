@@ -52,7 +52,7 @@ func writeJSON(w []Timer) {
 	_ = ioutil.WriteFile("end.json", file, 0644)
 }
 
-func main() {
+func checkConfig() {
 	// checking for config file
 	fmt.Println("checking for config file")
 	if _, err := os.Stat(FILE); os.IsNotExist(err) {
@@ -63,16 +63,9 @@ func main() {
 		fmt.Println("file exists")
 		fmt.Println("")
 	}
+}
 
-	// loads timers from config file
-	timers := getTimers()
-	fmt.Printf("there are currently %d saved timers\n", len(timers))
-	for _, ti := range timers {
-		// can use ti.Names to compare names etc
-		fmt.Println(ti.toString())
-	}
-	fmt.Println(" ")
-	fmt.Println(timers)
+func deleteTimer(name string, timers []Timer) {
 	// delete timers - need to allow this to use input to search - currently searching for "timer22"
 	for i, t := range timers {
 		i++
@@ -84,19 +77,10 @@ func main() {
 		}
 	}
 
-	// save timer
-	// temp values
-	fmt.Println("\nadding new config to slice")
-	n := "hitt23"
-	x := 1
-	y := 2
-	z := 3
-	newConfig := Timer{
-		Name: n,
-		Work: x,
-		Rest: y,
-		Sets: z,
-	}
+}
+
+func saveTimer(newConfig, timers []Timer, n string) {
+
 	// slice is set to length 10 to save memory - check that slice is less than 10 before adding
 	if len(timers) < 10 {
 		fmt.Println()
@@ -113,6 +97,36 @@ func main() {
 	} else {
 		fmt.Println("you already have 10 saved timers, you need to delete one before saving")
 	}
+}
+
+func main() {
+
+	checkConfig()
+
+	// loads timers from config file
+	timers := getTimers()
+	fmt.Printf("there are currently %d saved timers\n", len(timers))
+	for _, ti := range timers {
+		// can use ti.Names to compare names etc
+		fmt.Println(ti.toString())
+	}
+	fmt.Println(" ")
+	fmt.Println(timers)
+
+	// save timer
+	// temp values
+	fmt.Println("\nadding new config to slice")
+	n := "hitt23"
+	x := 1
+	y := 2
+	z := 3
+	newConfig := Timer{
+		Name: n,
+		Work: x,
+		Rest: y,
+		Sets: z,
+	}
+	saveTimer(newConfig, timers, n)
 
 	// load timer - actuall think we can keep in mems and just select from timers
 
