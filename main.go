@@ -79,7 +79,7 @@ func deleteTimer(name string, timers []Timer) {
 
 }
 
-func saveTimer(timers []Timer) {
+func saveTimer(t []Timer) {
 
 	// save timer
 	// temp values - will need ot be able to accept values
@@ -95,21 +95,22 @@ func saveTimer(timers []Timer) {
 		Sets: z,
 	}
 	// slice is set to length 10 to save memory - check that slice is less than 10 before adding
-	if len(timers) < 10 {
+	if len(t) < 10 {
 		fmt.Println()
 		// check for unique name
-		for _, tt := range timers {
+		for _, tt := range t {
 			if tt.Name == n {
 				fmt.Println("there is already a timer named: ", n)
 				fmt.Println("please pick a new name")
 			} else {
-				timers = append(timers, newConfig)
+				t = append(t, newConfig)
 			}
 		}
 
 	} else {
 		fmt.Println("you already have 10 saved timers, you need to delete one before saving")
 	}
+
 }
 
 func main() {

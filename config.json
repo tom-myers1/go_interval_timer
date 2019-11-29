@@ -1,23 +1,5 @@
 [
 {
-  "Name": "timer1",
-  "Work": 7,
-  "Rest": 3,
-  "Sets": 10
-},
-{
-  "Name": "fingerboard",
-  "Work": 7,
-  "Rest": 3,
-  "Sets": 10
-},
-{
-  "Name": "hitt",
-  "Work": 60,
-  "Rest": 20,
-  "Sets": 10
-},
-{
   "Name": "stretching",
   "Work": 60,
   "Rest": 15,
@@ -58,5 +40,17 @@
   "Work": 60,
   "Rest": 15,
   "Sets": 30
-}
+},
+ {
+  "name": "hitt4",
+  "work": 60,
+  "rest": 20,
+  "sets": 10
+ },
+ {
+  "name": "stretching4",
+  "work": 60,
+  "rest": 15,
+  "sets": 30
+ }
 ]
