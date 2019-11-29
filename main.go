@@ -79,8 +79,21 @@ func deleteTimer(name string, timers []Timer) {
 
 }
 
-func saveTimer(newConfig, timers []Timer, n string) {
+func saveTimer(timers []Timer) {
 
+	// save timer
+	// temp values - will need ot be able to accept values
+	fmt.Println("\nadding new config to slice")
+	n := "hitt23"
+	x := 1
+	y := 2
+	z := 3
+	newConfig := Timer{
+		Name: n,
+		Work: x,
+		Rest: y,
+		Sets: z,
+	}
 	// slice is set to length 10 to save memory - check that slice is less than 10 before adding
 	if len(timers) < 10 {
 		fmt.Println()
@@ -110,23 +123,9 @@ func main() {
 		// can use ti.Names to compare names etc
 		fmt.Println(ti.toString())
 	}
-	fmt.Println(" ")
-	fmt.Println(timers)
 
-	// save timer
-	// temp values
-	fmt.Println("\nadding new config to slice")
-	n := "hitt23"
-	x := 1
-	y := 2
-	z := 3
-	newConfig := Timer{
-		Name: n,
-		Work: x,
-		Rest: y,
-		Sets: z,
-	}
-	saveTimer(newConfig, timers, n)
+	// if click save
+	saveTimer(timers)
 
 	// load timer - actuall think we can keep in mems and just select from timers
 
