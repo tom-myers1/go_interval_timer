@@ -113,7 +113,17 @@ func saveTimer(t []Timer) {
 
 }
 
+func registerCallbacks() {
+
+}
+
 func main() {
+
+	c := make(chan struct{}, 0)
+	fmt.Println("WASM Go Going")
+	// register callbacks
+	registerCallbacks()
+	<-c
 
 	checkConfig()
 
