@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"syscall/js"
 )
 
 // FILE is used for config file
@@ -40,7 +41,7 @@ func getTimers() []Timer {
 	file, err := ioutil.ReadFile(FILE)
 	check(err)
 	json.Unmarshal(file, &timers)
-
+	js.Global().Set("output", timers)
 	return timers
 
 }
@@ -102,18 +103,23 @@ func saveTimer(t []Timer) {
 			if tt.Name == n {
 				fmt.Println("there is already a timer named: ", n)
 				fmt.Println("please pick a new name")
+				r := "bad"
 			} else {
 				t = append(t, newConfig)
+				r := "good"
 			}
 		}
 
 	} else {
 		fmt.Println("you already have 10 saved timers, you need to delete one before saving")
+		r := "full"
 	}
-
+	js.Global().Set("output", r)
 }
 
 func registerCallbacks() {
+	js.Global().Set("load", js.NewCallback(getTimers))
+	js.Global().Set("save", js.NewCallback(saveTimer))
 
 }
 
@@ -125,6 +131,7 @@ func main() {
 	registerCallbacks()
 	<-c
 
+	// look for config file + make if not found
 	checkConfig()
 
 	// loads timers from config file
