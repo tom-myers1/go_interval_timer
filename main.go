@@ -145,8 +145,6 @@ func main() {
 	// if click save
 	saveTimer(timers)
 
-	// load timer - actuall think we can keep in mems and just select from timers
-
 	// last thing to do is write config back to file
 	writeJSON(timers)
 }
