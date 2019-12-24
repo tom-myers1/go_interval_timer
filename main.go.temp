@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"time"
+	//"syscall/js"
 )
 
 // FILE is used for config file
@@ -33,7 +33,7 @@ func (t Timer) toString() string {
 	return string(bytes)
 }
 
-// getTimers reads configs from config.json
+// readJSON reads configs from config.json
 func getTimers() []Timer {
 
 	fmt.Println("getting saved configs")
@@ -41,11 +41,11 @@ func getTimers() []Timer {
 	file, err := ioutil.ReadFile(FILE)
 	check(err)
 	json.Unmarshal(file, &timers)
+	js.Global().Set("output", timers)
 	return timers
 
 }
 
-// writeJSON writes to config file
 func writeJSON(w []Timer) {
 	// do a write
 	file, err := json.MarshalIndent(w, "", " ")
@@ -53,7 +53,6 @@ func writeJSON(w []Timer) {
 	_ = ioutil.WriteFile("end.json", file, 0644)
 }
 
-// checkConfig looks for config file and creates if missing
 func checkConfig() {
 	// checking for config file
 	fmt.Println("checking for config file")
@@ -67,7 +66,6 @@ func checkConfig() {
 	}
 }
 
-// deleteTimer removes timer based on name
 func deleteTimer(name string, timers []Timer) {
 	// delete timers - need to allow this to use input to search - currently searching for "timer22"
 	for i, t := range timers {
@@ -82,7 +80,6 @@ func deleteTimer(name string, timers []Timer) {
 
 }
 
-// saveTimer adds timer to in memory list if less than 10 exist
 func saveTimer(t []Timer) {
 
 	// save timer
@@ -106,60 +103,33 @@ func saveTimer(t []Timer) {
 			if tt.Name == n {
 				fmt.Println("there is already a timer named: ", n)
 				fmt.Println("please pick a new name")
-
+				r := "bad"
 			} else {
 				t = append(t, newConfig)
-
+				r := "good"
 			}
 		}
 
 	} else {
 		fmt.Println("you already have 10 saved timers, you need to delete one before saving")
-
+		r := "full"
 	}
-
+	js.Global().Set("output", r)
 }
 
-// runTimer runs desired timer
-func runTimer(w, r, s int) {
+func registerCallbacks() {
+	js.Global().Set("load", js.NewCallback(getTimers))
+	js.Global().Set("save", js.NewCallback(saveTimer))
 
-	fmt.Printf("Number of sets = %d\n", s)
-	fmt.Printf("Working seconds = %d\n", w)
-	fmt.Printf("Resting seconds = %d\n", r)
-
-	fmt.Println("press any key to start")
-	_, err := fmt.Scanln()
-	check(err)
-
-	fmt.Printf("\n*********Starting timer*********\n")
-	for x := 5; x > 0; x-- {
-		fmt.Printf("%d\n", x)
-		time.Sleep(time.Second)
-	}
-
-	for s > 0 {
-		fmt.Printf("*****starting set %d*****", s)
-
-		fmt.Printf("\n***Working***\n")
-		w1 := w
-		for w1 > 0 {
-			fmt.Printf("%d\n", w1)
-			time.Sleep(time.Second)
-			w1--
-		}
-		r1 := r
-		fmt.Printf("\n***Resting***\n")
-		for r1 > 0 {
-			fmt.Printf("%d\n", r1)
-			time.Sleep(time.Second)
-			r1--
-		}
-		s--
-	}
-	fmt.Printf("\n\n*********DONE!!!*********\n\n")
 }
 
 func main() {
+
+	c := make(chan struct{}, 0)
+	fmt.Println("WASM Go Going")
+	// register callbacks
+	registerCallbacks()
+	<-c
 
 	// look for config file + make if not found
 	checkConfig()
@@ -173,10 +143,8 @@ func main() {
 	}
 
 	// if click save
-	//saveTimer(timers)
+	saveTimer(timers)
 
 	// last thing to do is write config back to file
-	//writeJSON(timers)
-
-	runTimer()
+	writeJSON(timers)
 }
