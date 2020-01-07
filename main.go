@@ -1,22 +1,28 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strconv"
+	"strings"
 	"time"
 )
 
 // FILE is used for config file
 const FILE = "config.json"
 
+// EOL is used for end of line in bufio string reader
+const EOL = '\r'
+
 // Timer is json structure for timer configs
 type Timer struct {
 	Name string `json:"name"`
-	Work int    `json:"work"`
-	Rest int    `json:"rest"`
-	Sets int    `json:"sets"`
+	Work int64  `json:"work"`
+	Rest int64  `json:"rest"`
+	Sets int64  `json:"sets"`
 }
 
 // check is a basic error checker
@@ -82,6 +88,17 @@ func deleteTimer(name string, timers []Timer) {
 
 }
 
+// loadTimers is call from menu
+func loadTimer() {
+	// loads timers from config file
+	timers := getTimers()
+	fmt.Printf("there are currently %d saved timers\n", len(timers))
+	for _, ti := range timers {
+		// can use ti.Names to compare names etc
+		fmt.Println(ti.toString())
+	}
+}
+
 // saveTimer adds timer to in memory list if less than 10 exist
 func saveTimer(t []Timer) {
 
@@ -119,15 +136,60 @@ func saveTimer(t []Timer) {
 	}
 
 }
+func validate(x string) int64 {
+
+	x = strings.TrimRight(x, "\r\n")
+	fmt.Println("validating -", x)
+	z, err := strconv.ParseInt(x, 10, 64)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Print("checking ", z, " is within accepted rance of 1 - 180\n")
+
+	if z < 1 || z >= 180 {
+
+		fmt.Println("cannot be less than 1 or greater than 180!")
+		manualTimer()
+
+	}
+	println("valid")
+	return z
+}
+
+// manualTimer allows user to add config manually
+func manualTimer() {
+	readerS := bufio.NewReader(os.Stdin)
+	readerW := bufio.NewReader(os.Stdin)
+	readerR := bufio.NewReader(os.Stdin)
+	fmt.Println("\nplease enter number of sets and hit enter: ")
+	s, err := readerS.ReadString(EOL)
+	check(err)
+	sets := validate(s)
+	fmt.Println("\nplease enter number of seconds for working and hit enter: ")
+	w, err := readerW.ReadString(EOL)
+	check(err)
+	working := validate(w)
+	fmt.Println("\nplease enter number of seconds for resting and hit enter: ")
+	r, err := readerR.ReadString(EOL)
+	check(err)
+	rest := validate(r)
+	current := Timer{
+		Name: "active",
+		Work: working,
+		Rest: rest,
+		Sets: sets,
+	}
+	runTimer(working, rest, sets)
+}
 
 // runTimer runs desired timer
-func runTimer(w, r, s int) {
+func runTimer(w, r, s int64) {
 
 	fmt.Printf("Number of sets = %d\n", s)
 	fmt.Printf("Working seconds = %d\n", w)
 	fmt.Printf("Resting seconds = %d\n", r)
 
-	fmt.Println("press any key to start")
+	fmt.Println("press enter key to start")
 	_, err := fmt.Scanln()
 	check(err)
 
@@ -137,11 +199,13 @@ func runTimer(w, r, s int) {
 		time.Sleep(time.Second)
 	}
 
+	// sets loop
 	for s > 0 {
 		fmt.Printf("*****starting set %d*****", s)
 
 		fmt.Printf("\n***Working***\n")
 		w1 := w
+		// working loop
 		for w1 > 0 {
 			fmt.Printf("%d\n", w1)
 			time.Sleep(time.Second)
@@ -149,6 +213,7 @@ func runTimer(w, r, s int) {
 		}
 		r1 := r
 		fmt.Printf("\n***Resting***\n")
+		// resting loop
 		for r1 > 0 {
 			fmt.Printf("%d\n", r1)
 			time.Sleep(time.Second)
@@ -157,6 +222,39 @@ func runTimer(w, r, s int) {
 		s--
 	}
 	fmt.Printf("\n\n*********DONE!!!*********\n\n")
+	menu()
+}
+
+// menu is main menu for command line
+func menu() {
+	// ask to load or manually set timers
+	fmt.Println("\n*** MENU ***\n\n * press 1 to load from config file\n * press 2 to input settings\n * press q to quit")
+
+	reader := bufio.NewReader(os.Stdin)
+	input, _, err := reader.ReadRune()
+	check(err)
+
+	switch input {
+
+	case '1':
+		loadTimer()
+
+	case '2':
+		manualTimer()
+
+	case '3':
+		//		saveTimer()
+
+	case 'q':
+		fmt.Println("exiting...")
+		os.Exit(1)
+
+	default:
+		fmt.Println("you seem to have missed 1, 2 or q... please try again")
+		menu()
+		return
+	}
+
 }
 
 func main() {
@@ -164,19 +262,13 @@ func main() {
 	// look for config file + make if not found
 	checkConfig()
 
-	// loads timers from config file
-	timers := getTimers()
-	fmt.Printf("there are currently %d saved timers\n", len(timers))
-	for _, ti := range timers {
-		// can use ti.Names to compare names etc
-		fmt.Println(ti.toString())
-	}
+	menu()
+
+	//runTimer(10, 3, 1)
 
 	// if click save
 	//saveTimer(timers)
 
 	// last thing to do is write config back to file
 	//writeJSON(timers)
-
-	runTimer()
 }
