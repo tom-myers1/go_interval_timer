@@ -100,21 +100,27 @@ func loadTimer() {
 }
 
 // saveTimer adds timer to in memory list if less than 10 exist
-func saveTimer(t []Timer) {
+func saveTimer(t []Timer, current Timer) {
 
 	// save timer
 	// temp values - will need ot be able to accept values
 	fmt.Println("\nadding new config to slice")
-	n := "hitt23"
-	x := 1
-	y := 2
-	z := 3
+	n := "newConfig"
+	
+	var w, r, 
+	w := 1
+	r := 1
+	s := 1
+	
 	newConfig := Timer{
 		Name: n,
-		Work: x,
-		Rest: y,
-		Sets: z,
+		Work: w,
+		Rest: r,
+		Sets: s,
 	}
+
+	// expecting time to be passed
+
 	// slice is set to length 10 to save memory - check that slice is less than 10 before adding
 	if len(t) < 10 {
 		fmt.Println()
@@ -136,6 +142,7 @@ func saveTimer(t []Timer) {
 	}
 
 }
+
 func validate(x string) int64 {
 
 	x = strings.TrimRight(x, "\r\n")
@@ -179,11 +186,16 @@ func manualTimer() {
 		Rest: rest,
 		Sets: sets,
 	}
-	runTimer(working, rest, sets)
+	runTimer(current)
+
 }
 
 // runTimer runs desired timer
-func runTimer(w, r, s int64) {
+func runTimer(current Timer) {
+
+	s := current.Sets
+	w := current.Work
+	r := current.Rest
 
 	fmt.Printf("Number of sets = %d\n", s)
 	fmt.Printf("Working seconds = %d\n", w)
