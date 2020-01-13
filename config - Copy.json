@@ -30,6 +30,24 @@
   "Sets": 30
 },
 {
+  "Name": "hitt3",
+  "Work": 60,
+  "Rest": 20,
+  "Sets": 10
+},
+{
+  "Name": "stretching3",
+  "Work": 60,
+  "Rest": 15,
+  "Sets": 30
+},
+ {
+  "name": "hitt4",
+  "work": 60,
+  "rest": 20,
+  "sets": 10
+ },
+ {
   "name": "stretching4",
   "work": 60,
   "rest": 15,

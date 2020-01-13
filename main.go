@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -43,10 +44,14 @@ func (t Timer) toString() string {
 func getTimers() []Timer {
 
 	fmt.Println("getting saved configs")
-	timers := make([]Timer, 10)
+	timers := make([]Timer, 9)
 	file, err := ioutil.ReadFile(FILE)
 	check(err)
 	json.Unmarshal(file, &timers)
+	if !bytes.ContainsAny(file, "Name") {
+		fmt.Println("there are no saved configs")
+		menu()
+	}
 	return timers
 
 }
@@ -73,7 +78,7 @@ func checkConfig() {
 	}
 }
 
-// deleteTimer removes timer based on name
+// deleteTimer removes timer based on name or all
 func deleteTimer(name string, timers []Timer) {
 	// delete timers - need to allow this to use input to search - currently searching for "timer22"
 	for i, t := range timers {
@@ -88,15 +93,55 @@ func deleteTimer(name string, timers []Timer) {
 
 }
 
-// loadTimers is call from menu
+// selectTimer creates console reader to allow user to select a timer from the list
+func selectTimer(x int, y int) rune {
+	// if sent from deleteTimers y == 1
+
+	reader := bufio.NewReader(os.Stdin)
+	input, _, err := reader.ReadRune()
+	check(err)
+
+	i := input - 48
+
+	if input == 'm' {
+		menu()
+	}
+
+	if input == 'a' && y == 1 {
+		return input
+	}
+
+	// validate inpiut is between 1 and x
+	if input < '1' || i > rune(x) {
+		fmt.Printf("\nplease input a number between 1 and %d\n", x)
+		selectTimer(x, y)
+	}
+
+	return input
+
+}
+
+// loadTimers is call from menu to read config file into memory and display any timers
 func loadTimer() {
 	// loads timers from config file
 	timers := getTimers()
+	x := 0
 	fmt.Printf("there are currently %d saved timers\n", len(timers))
 	for _, ti := range timers {
+		x++
 		// can use ti.Names to compare names etc
-		fmt.Println(ti.toString())
+		//fmt.Println(ti.toString())
+		fmt.Printf("%d) %s - ", x, ti.Name)
+		fmt.Printf("work: %d ", ti.Work)
+		fmt.Printf("	rest: %d ", ti.Rest)
+		fmt.Printf("	sets: %d\n", ti.Sets)
 	}
+
+	fmt.Printf("\nselect config to load from 1 - %d or press m to return to menu\n", x)
+	t := selectTimer(x, 2)
+	fmt.Print(t)
+	fmt.Printf("you have selected timer: %s", timers[t].Name) //
+
 }
 
 // saveTimer adds timer to in memory list if less than 10 exist
@@ -106,12 +151,12 @@ func saveTimer(t []Timer, current Timer) {
 	// temp values - will need ot be able to accept values
 	fmt.Println("\nadding new config to slice")
 	n := "newConfig"
-	
-	var w, r, 
-	w := 1
-	r := 1
-	s := 1
-	
+
+	var w, r, s int64
+	w = 1
+	r = 1
+	s = 1
+
 	newConfig := Timer{
 		Name: n,
 		Work: w,
@@ -240,7 +285,7 @@ func runTimer(current Timer) {
 // menu is main menu for command line
 func menu() {
 	// ask to load or manually set timers
-	fmt.Println("\n*** MENU ***\n\n * press 1 to load from config file\n * press 2 to input settings\n * press q to quit")
+	fmt.Println("\n*** MENU ***\n\n * press 1 to load from config file\n * press 2 to input settings\n * press 3 to save to config file\n * press  to delete a saved config\n * press q to quit")
 
 	reader := bufio.NewReader(os.Stdin)
 	input, _, err := reader.ReadRune()
@@ -257,12 +302,15 @@ func menu() {
 	case '3':
 		//		saveTimer()
 
+	case '4':
+		//		deleteTimer()
+
 	case 'q':
 		fmt.Println("exiting...")
 		os.Exit(1)
 
 	default:
-		fmt.Println("you seem to have missed 1, 2 or q... please try again")
+		fmt.Println("you seem to have missed 1, 2, 3, 4 or q... please try again")
 		menu()
 		return
 	}
