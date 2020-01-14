@@ -40,35 +40,12 @@ func (t Timer) toString() string {
 	return string(bytes)
 }
 
-// getTimers reads configs from config.json
-func getTimers() []Timer {
-
-	current := Timer{
-		Name: "znxxzn7xx",
-		Work: 0,
-		Rest: 0,
-		Sets: 0,
-	}
-
-	fmt.Println("getting saved configs")
-	timers := make([]Timer, 9)
-	file, err := ioutil.ReadFile(FILE)
-	check(err)
-	json.Unmarshal(file, &timers)
-	if !bytes.ContainsAny(file, "Name") {
-		fmt.Println("there are no saved configs")
-		menu(current)
-	}
-	return timers
-
-}
-
 // writeJSON writes to config file
 func writeJSON(w []Timer) {
 	// do a write
 	file, err := json.MarshalIndent(w, "", " ")
 	check(err)
-	_ = ioutil.WriteFile("end.json", file, 0644)
+	_ = ioutil.WriteFile(FILE, file, 0644)
 }
 
 // checkConfig looks for config file and creates if missing
@@ -86,63 +63,73 @@ func checkConfig() {
 }
 
 // deleteTimer removes timer based on name or all
-func deleteTimer(name string, timers []Timer) {
-	// delete timers - need to allow this to use input to search - currently searching for "timer22"
-	for i, t := range timers {
-		i++
-		if t.Name == "timer23" {
-			fmt.Printf("timer23 found - removing timer from position:%d", i)
+func deleteTimer(current Timer, timers []Timer) {
 
-			timers = append(timers[:i-1], timers[i:]...)
-
+	fmt.Println("press 1 to select config or press 9 to delete all")
+	reader := bufio.NewReader(os.Stdin)
+	input, _, err := reader.ReadRune()
+	check(err)
+	if input == '9' {
+		fmt.Println("WARNING - THIS WILL DELETE ALL SAVED CONFIGS")
+		fmt.Println("press y to comtinue")
+		reader2 := bufio.NewReader(os.Stdin)
+		input2, _, err := reader2.ReadRune()
+		check(err)
+		if input2 == 'y' {
+			// delete all configs, return to main
+			empty := make([]Timer, 9)
+			writeJSON(empty)
+			main()
 		}
 	}
+
+	selected := selectTimer(loadTimer())
+	sName := selected.Name
+	deleted := 0
+	// delete timers
+	for i, t := range timers {
+		i++
+		if t.Name == sName {
+			fmt.Printf("%s found - removing timer from position:%d", sName, i)
+
+			timers = append(timers[:i-1], timers[i:]...)
+			deleted++
+		}
+	}
+
+	if deleted == 0 {
+
+		fmt.Println("%s not found", sName)
+	}
+
+	fmt.Println("press 1 to delete more or any other key to return to menu")
+	reader3 := bufio.NewReader(os.Stdin)
+	input3, _, err := reader3.ReadRune()
+	check(err)
+	if input3 == '1' {
+		deleteTimer(current, timers)
+	}
+	// save updated slice of timers
+	fmt.Println("saving current configs to file and returning to menu...")
+	writeJSON(timers)
+	menu(current)
 
 }
 
 // selectTimer creates console reader to allow user to select a timer from the list
-func selectTimer(x int, y int) rune {
-	// if sent from deleteTimers y == 1
+func selectTimer(timers []Timer) Timer {
+
 	current := Timer{
 		Name: "znxxzn7xx",
 		Work: 0,
 		Rest: 0,
 		Sets: 0,
 	}
-	reader := bufio.NewReader(os.Stdin)
-	input, _, err := reader.ReadRune()
-	check(err)
 
-	i := input - 48
-
-	if input == 'm' {
-		menu(current)
-	}
-
-	if input == 'a' && y == 1 {
-		return input
-	}
-
-	// validate inpiut is between 1 and x
-	if input < '1' || i > rune(x) {
-		fmt.Printf("\nplease input a number between 1 and %d\n", x)
-		selectTimer(x, y)
-	}
-
-	return input
-
-}
-
-// loadTimers is call from menu to read config file into memory and display any timers
-func loadTimer() {
-	// loads timers from config file
-	timers := getTimers()
 	x := 0
 	fmt.Printf("there are currently %d saved timers\n", len(timers))
 	for _, ti := range timers {
 		x++
-		// can use ti.Names to compare names etc
-		//fmt.Println(ti.toString())
 		fmt.Printf("%d) %s - ", x, ti.Name)
 		fmt.Printf("work: %d ", ti.Work)
 		fmt.Printf("	rest: %d ", ti.Rest)
@@ -150,36 +137,71 @@ func loadTimer() {
 	}
 
 	fmt.Printf("\nselect config to load from 1 - %d or press m to return to menu\n", x)
-	t := selectTimer(x, 2)
-	t = t -49 // -49 to compensate for zero index
-	fmt.Printf("you have selected timer: %s\n", timers[t].Name) 
-	runTimer(timers[t])
-}
 
-// saveTimer adds timer to in memory list if less than 10 exist
-func saveTimer(t []Timer, current Timer) {
+	reader := bufio.NewReader(os.Stdin)
+	input, _, err := reader.ReadRune()
+	check(err)
 
-	// save timer
-	// temp values - will need ot be able to accept values
-	fmt.Println("\nadding new config to slice")
-	n := "newConfig"
-
-	var w, r, s int64
-	w = 1
-	r = 1
-	s = 1
-
-	newConfig := Timer{
-		Name: n,
-		Work: w,
-		Rest: r,
-		Sets: s,
+	if input == 'm' {
+		menu(current)
 	}
 
-	// expecting time to be passed
+	i := input - 48
+	fmt.Print(i)
+	fmt.Printf("\nx = %d\n", x)
+	fmt.Printf("i = %d\n", i)
+	// validate input is between 1 and x
+	if input < '1' || i > rune(x) {
+		fmt.Printf("\nplease input a number between 1 and %d\n", x)
+		selectTimer(timers)
+	}
+	t := timers[i-1] // TODO: currently doing something strange if you input an out of range number then select an actual config
+	fmt.Printf("you have selected timer: %s\n", t.Name)
 
-	// slice is set to length 10 to save memory - check that slice is less than 10 before adding
-	if len(t) < 10 {
+	return t
+
+}
+
+// loadTimers is call from menu to read config file into memory and display any timers
+func loadTimer() []Timer {
+	// loads timers from config file
+	current := Timer{
+		Name: "znxxzn7xx",
+		Work: 0,
+		Rest: 0,
+		Sets: 0,
+	}
+
+	fmt.Println("getting saved configs")
+	timers := make([]Timer, 9)
+	file, err := ioutil.ReadFile(FILE)
+	check(err)
+	json.Unmarshal(file, &timers)
+	if !bytes.ContainsAny(file, "Name") {
+		fmt.Println("there are no saved configs")
+		menu(current)
+	}
+
+	return timers
+
+}
+
+// saveTimer adds timer to in memory list if less than 9 exist
+func saveTimer(t []Timer, current Timer) {
+
+	fmt.Println("press 1 to add current timer, 2 to input new timer or m to return to menu")
+	r := bufio.NewReader(os.Stdin)
+	i, err := r.ReadRune()
+	if i == 'm' {
+		menu(current)
+	}
+	fmt.Println("please enter a name for the timer")
+	reader := bufio.NewReader(os.Stdin)
+	input, err := reader.ReadString(EOL)
+	check(err)
+	n := input
+	// slice is set to length 9 to save memory - check that slice is less than 9 before adding
+	if len(t) < 9 {
 		fmt.Println()
 		// check for unique name
 		for _, tt := range t {
@@ -188,13 +210,13 @@ func saveTimer(t []Timer, current Timer) {
 				fmt.Println("please pick a new name")
 
 			} else {
-				t = append(t, newConfig)
+				t = append(t, current)
 
 			}
 		}
 
 	} else {
-		fmt.Println("you already have 10 saved timers, you need to delete one before saving")
+		fmt.Println("you already have 9 saved timers, you need to delete one before saving")
 
 	}
 
@@ -213,15 +235,15 @@ func validate(x string) int64 {
 	if z < 1 || z >= 180 {
 
 		fmt.Println("cannot be less than 1 or greater than 180!")
-		manualTimer()
+		userInput()
 
 	}
 	println("valid")
 	return z
 }
 
-// manualTimer allows user to add config manually
-func manualTimer() {
+// userInput collects user input config from command line
+func userInput() Timer {
 	readerS := bufio.NewReader(os.Stdin)
 	readerW := bufio.NewReader(os.Stdin)
 	readerR := bufio.NewReader(os.Stdin)
@@ -238,13 +260,12 @@ func manualTimer() {
 	check(err)
 	rest := validate(r)
 	current := Timer{
-		Name: "active",
+		Name: "activezxzxzxzxzxzxzx",
 		Work: working,
 		Rest: rest,
 		Sets: sets,
 	}
-	runTimer(current)
-
+	return current
 }
 
 // runTimer runs desired timer
@@ -291,6 +312,15 @@ func runTimer(current Timer) {
 		s--
 	}
 	fmt.Printf("\n\n*********DONE!!!*********\n\n")
+	fmt.Println("well done, workout complete...")
+	fmt.Println("would you like to save the current config?")
+	fmt.Println("press 1 to save or any other key to return to menu")
+	reader := bufio.NewReader(os.Stdin)
+	input, _, err := reader.ReadRune()
+	check(err)
+	if input == '1' {
+		saveTimer(loadTimer(), current)
+	}
 	menu(current)
 }
 
@@ -308,6 +338,8 @@ func menu(current Timer) {
 	* press 4 to delete a saved config 
 	* press q to quit`)
 
+	fmt.Println(" ") // adding spacing for menu
+
 	reader := bufio.NewReader(os.Stdin)
 	input, _, err := reader.ReadRune()
 	check(err)
@@ -315,16 +347,21 @@ func menu(current Timer) {
 	switch input {
 
 	case '1':
-		loadTimer()
+
+		selected := selectTimer(loadTimer())
+		runTimer(selected)
 
 	case '2':
-		manualTimer()
+
+		runTimer(userInput())
 
 	case '3':
-		//		saveTimer()
+
+		saveTimer(loadTimer(), current)
 
 	case '4':
-		//		deleteTimer()
+
+		deleteTimer(current, loadTimer())
 
 	case 'q':
 		fmt.Println("exiting...")
@@ -339,13 +376,13 @@ func menu(current Timer) {
 }
 
 func main() {
-// initialising a temp timer as to allow for passing timer to menu 
-tempConfig := Timer{
-	Name: "znxxzn7xx",
-	Work: 0,
-	Rest: 0,
-	Sets: 0,
-}
+	// initialising a temp timer as to allow for passing timer to menu
+	tempConfig := Timer{
+		Name: "znxxzn7xx",
+		Work: 0,
+		Rest: 0,
+		Sets: 0,
+	}
 
 	// look for config file + make if not found
 	checkConfig()
