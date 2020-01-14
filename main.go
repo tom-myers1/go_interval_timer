@@ -13,10 +13,11 @@ import (
 )
 
 // FILE is used for config file
-const FILE = "config.json"
+const FILE = "./config.json"
 
 // EOL is used for end of line in bufio string reader
-const EOL = '\r'
+// const EOL = '\r' // win
+const EOL = '\n' // nix
 
 // Timer is json structure for timer configs
 type Timer struct {
@@ -173,53 +174,76 @@ func loadTimer() []Timer {
 	}
 
 	fmt.Println("getting saved configs")
-	timers := make([]Timer, 9)
+	t := make([]Timer, 9)
 	file, err := ioutil.ReadFile(FILE)
 	check(err)
-	json.Unmarshal(file, &timers)
+	json.Unmarshal(file, &t) // TODO: something here isnt populating the the file contentss
 	if !bytes.ContainsAny(file, "Name") {
 		fmt.Println("there are no saved configs")
 		menu(current)
 	}
-
-	return timers
+	fmt.Println("in laod...")
+	x := 0
+	for _, ti := range t {
+		x++
+		fmt.Printf("%d) %s - ", x, ti.Name)
+		fmt.Printf("work: %d ", ti.Work)
+		fmt.Printf("	rest: %d ", ti.Rest)
+		fmt.Printf("	sets: %d\n", ti.Sets)
+	}
+	return t
 
 }
 
 // saveTimer adds timer to in memory list if less than 9 exist
 func saveTimer(t []Timer, current Timer) {
 
-	fmt.Println("press 1 to add current timer, 2 to input new timer or m to return to menu")
-	r := bufio.NewReader(os.Stdin)
-	i, err := r.ReadRune()
-	if i == 'm' {
+	// go back to menu if full
+	if len(t) > 8 {
+		fmt.Println("there is already 9 configs saved, please delete some to make room...")
 		menu(current)
 	}
-	fmt.Println("please enter a name for the timer")
+
+	fmt.Println("press 1 to add current timer, 2 to input new timer or m to return to menu")
+	r := bufio.NewReader(os.Stdin)
+	i, _, err := r.ReadRune()
+
+	switch i {
+	case 'm':
+
+		menu(current)
+
+	case '2':
+
+		current = userInput()
+
+	default:
+		fmt.Println("unkonw input...")
+		saveTimer(t, current)
+
+	}
+getName:
+	fmt.Println("please enter a name for the timer and press enter")
 	reader := bufio.NewReader(os.Stdin)
 	input, err := reader.ReadString(EOL)
 	check(err)
-	n := input
-	// slice is set to length 9 to save memory - check that slice is less than 9 before adding
-	if len(t) < 9 {
-		fmt.Println()
-		// check for unique name
-		for _, tt := range t {
-			if tt.Name == n {
-				fmt.Println("there is already a timer named: ", n)
-				fmt.Println("please pick a new name")
+	n := strings.TrimRight(input, "\r\n")
 
-			} else {
-				t = append(t, current)
-
-			}
+	// check for unique name
+	for _, tt := range t {
+		fmt.Println("checking for name match - ", tt.Name)
+		if tt.Name == n {
+			fmt.Println("there is already a timer named: ", n)
+			fmt.Println("please pick a new name")
+			goto getName
 		}
-
-	} else {
-		fmt.Println("you already have 9 saved timers, you need to delete one before saving")
-
 	}
 
+	current.Name = n
+	t = append(t, current)
+	writeJSON(t)
+
+	menu(current)
 }
 
 func validate(x string) int64 {
@@ -389,11 +413,4 @@ func main() {
 
 	menu(tempConfig)
 
-	//runTimer(10, 3, 1)
-
-	// if click save
-	//saveTimer(timers)
-
-	// last thing to do is write config back to file
-	//writeJSON(timers)
 }

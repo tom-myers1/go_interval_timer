@@ -1,0 +1,20 @@
+[
+  {
+    "name": "stretching",
+    "work": 60,
+    "rest": 15,
+    "sets": 30
+  },
+  {
+    "name": "timer2",
+    "work": 7,
+    "rest": 3,
+    "sets": 10
+  },
+  {
+    "name": "fingerboard2",
+    "work": 7,
+    "rest": 3,
+    "sets": 10
+  },
+]
